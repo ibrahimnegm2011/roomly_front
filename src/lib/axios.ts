@@ -1,35 +1,33 @@
 import Axios from "axios";
 
+
 export function getTenantBaseUrl(): string {
   const rawBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
   if (typeof window === 'undefined') return rawBaseUrl;
 
   try {
-    const backendUrl = new URL(rawBaseUrl);
-    const backendHost = backendUrl.hostname; // e.g. api.roomly.com or localhost
-    const currentHost = window.location.hostname; // e.g. tenant1.roomly.com or tenant1.localhost
+    const backendUrl = new URL(rawBaseUrl); // e.g., roomly.com
+    const backendHost = backendUrl.hostname;
+    const currentHost = window.location.hostname;
 
     const backendParts = backendHost.split('.');
     const currentParts = currentHost.split('.');
 
-    // If current host is the same as backend host (no tenant), return raw
     if (currentHost === backendHost) {
-      return rawBaseUrl;
+      return rawBaseUrl; // No subdomain needed
     }
 
-    // If current host has more parts (i.e. includes tenant), try to inject it
+    // Check if current host is a subdomain of the backend host
     if (
       currentParts.length > backendParts.length &&
       currentHost.endsWith(backendHost)
     ) {
-      const tenant = currentParts.slice(0, currentParts.length - backendParts.length).join('.');
-      const newHost = `${tenant}.${backendHost}`;
-      backendUrl.hostname = newHost;
+      const tenantSub = currentParts.slice(0, currentParts.length - backendParts.length).join('.');
+      backendUrl.hostname = `${tenantSub}.${backendHost}`;
       return backendUrl.toString();
     }
 
-    // Otherwise, return base URL without change
     return rawBaseUrl;
   } catch (e) {
     console.warn('[getTenantBaseUrl] Invalid BACKEND_URL:', rawBaseUrl, e);
