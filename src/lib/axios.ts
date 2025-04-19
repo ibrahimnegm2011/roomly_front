@@ -1,5 +1,5 @@
 import Axios from "axios";
-
+import Cookies from "js-cookie";
 
 export function getTenantBaseUrl(): string {
   const rawBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
@@ -45,6 +45,14 @@ const axios = Axios.create({
   },
   withCredentials: true,
   withXSRFToken: true,
+});
+
+axios.interceptors.request.use((config) => {
+  const token = Cookies.get("XSRF-TOKEN");
+  if (token) {
+    config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
+  }
+  return config;
 });
 
 export default axios;
