@@ -35,6 +35,7 @@ export function getTenantBaseUrl(): string {
   }
 }
 
+const token = Cookies.get('XSRF-TOKEN');
 
 const axios = Axios.create({
   baseURL: getTenantBaseUrl(),
@@ -42,17 +43,12 @@ const axios = Axios.create({
     "X-Requested-With": "XMLHttpRequest",
     Accept: "application/json",
     "Content-Type": "application/json",
+    ...(token && { 'X-XSRF-TOKEN': decodeURIComponent(token) }),
+
+
   },
   withCredentials: true,
   withXSRFToken: true,
-});
-
-axios.interceptors.request.use((config) => {
-  const token = Cookies.get("XSRF-TOKEN");
-  if (token) {
-    config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
-  }
-  return config;
 });
 
 export default axios;
