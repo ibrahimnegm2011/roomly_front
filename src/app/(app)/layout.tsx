@@ -10,7 +10,7 @@ import "jsvectormap/dist/jsvectormap.css";
 
 import { Header } from "@/components/Layouts/header";
 import NextTopLoader from "nextjs-toploader";
-import type { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import { Providers } from "./providers";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
@@ -19,9 +19,13 @@ export default function AppLayout({ children }: PropsWithChildren) {
   const {user, loading} = useAuth();
   const router = useRouter();
 
-  if (loading) return null;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [loading, user]);
 
-  if(! user) router.push('/login');
+  if (loading) return null;
 
   return (
     <Providers>
